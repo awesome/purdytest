@@ -30,11 +30,32 @@ module Purdytest
       when '.' then io.print "\e[#{COLORS[pass]}m.\e[0m"
       when 'E' then io.print "\e[#{COLORS[error]}mE\e[0m"
       when 'F' then io.print "\e[#{COLORS[self.fail]}mF\e[0m"
-      when 'S' then io.print "\e[#{COLORS[skip]}mS\e[0m"
+      #when 'S' then io.print "\e[#{COLORS[skip]}mS\e[0m"
+      # https://github.com/dudleyf/purdytest/commit/9493a2ddb95c11072ca3ad60aaba667ff165f67b
+      when 'S' then io.print "\e[#{COLORS[skip]}m.\e[0m"
       else
         io.print o
       end
     end
+
+    # https://github.com/dudleyf/purdytest/commit/9493a2ddb95c11072ca3ad60aaba667ff165f67b
+    def puts *args
+      status_re = /(\d+) tests, (\d+) assertions, (\d+) failures, (\d+) errors, (\d+) skips/
+      args.each do |arg|
+        if (m = status_re.match(arg))
+          tests, asserts, fails, errs, skips = m.captures
+          msg = "#{tests} tests, #{asserts} assertions, #{fails} failures, #{errs} errors, #{skips} skips"
+          color = pass
+          color = skip if skips.to_i > 0
+          color = error if errs.to_i > 0
+          color = self.fail if fails.to_i > 0
+          io.puts "\e[#{COLORS[color]}m#{msg}\e[0m"
+        else
+          io.puts arg
+        end
+      end
+    end
+
 
     def method_missing msg, *args
       return super unless io.respond_to?(msg)
