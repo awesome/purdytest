@@ -50,12 +50,14 @@ module Purdytest
           color = error if errs.to_i > 0
           color = self.fail if fails.to_i > 0
           io.puts "\e[#{COLORS[color]}m#{msg}\e[0m"
+        elsif arg =~ /Finished tests/
+          io.puts 
+          io.puts arg
         else
           io.puts arg
         end
       end
     end
-
 
     def method_missing msg, *args
       return super unless io.respond_to?(msg)
